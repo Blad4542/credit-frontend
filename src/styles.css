@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+.react-tel-input {
+  width: 100% !important; /* El contenedor ocupa todo el ancho */
+}
+
+.react-tel-input .form-control {
+  width: 100% !important; /* Hace que el campo sea igual de ancho que los otros inputs */
+  height: 3rem !important; /* Ajusta la altura para que sea consistente */
+  border: 1px solid #d1d5db !important; /* Borde gris claro como los demás inputs */
+  border-radius: 0.375rem !important; /* Esquinas redondeadas */
+  font-size: 1rem !important; /* Tamaño de fuente consistente */
+}
+
+.react-tel-input .flag-dropdown {
+  height: 3rem !important; /* Asegura que el botón de la bandera tenga la misma altura */
+  border: 1px solid #d1d5db !important;
+  border-right: none !important; /* Elimina el doble borde entre la bandera y el input */
+}
+
+.react-tel-input .selected-flag {
+  background-color: #fff !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
