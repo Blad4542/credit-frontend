@@ -174,7 +174,7 @@ const Step2: React.FC<Step2Props> = ({
   };
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-gray-100">
+    <div className="flex flex-col h-screen w-screen">
       <div className="w-full h-[34px]">
         <img
           src={headerImage}
@@ -183,14 +183,14 @@ const Step2: React.FC<Step2Props> = ({
         />
       </div>
 
-      <div className="flex flex-col lg:flex-row h-full items-center justify-center px-4 lg:px-16">
-        <div className="lg:w-1/2 w-full flex flex-col justify-center items-center lg:items-start p-4 lg:p-8">
+      <div className="flex flex-col lg:flex-row lg:h-full h-auto items-center lg:items-start justify-center px-4 lg:px-16 lg:mt-[100px]">
+        <div className="lg:w-1/2 w-full flex flex-col justify-center items-center lg:items-start p-4 lg:p-8 ">
           <img
             src={logoImage}
             alt="Samla Logo"
-            className="w-20 h-auto mt-4 lg:mt-0 mb-6"
+            className="w-20 h-auto mt-2 lg:mt-0 mb-4"
           />
-          <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center lg:text-left">
+          <h1 className="text-xl lg:text-2xl font-bold text-gray-800 mb-6 text-center lg:text-left">
             Datos de vivienda
           </h1>
 
@@ -294,7 +294,7 @@ const Step2: React.FC<Step2Props> = ({
         </div>
 
         <div className="lg:w-1/2 w-full flex flex-col justify-center items-center p-8">
-          <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center lg:mt-0">
+          <h1 className="text-2xl font-bold text-gray-800 mb-6 lg:mt-[40px] text-center ">
             Fotografía de documento de identidad
           </h1>
           <div
@@ -338,7 +338,7 @@ const Step2: React.FC<Step2Props> = ({
               </p>
             )}
           </div>
-          <div className="w-full flex justify-end space-x-4 px-8 py-4 mt-6">
+          <div className="w-full flex justify-end space-x-4 px-8 py-4 mt-6 lg:mr-[50px]">
             <button
               type="button"
               onClick={handleCancel}
