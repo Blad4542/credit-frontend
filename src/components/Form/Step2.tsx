@@ -314,13 +314,18 @@ const Step2: React.FC<Step2Props> = ({
               className="w-10 h-10 mb-4"
             />
             <p className="text-gray-600 text-lg">Arrastra aquí</p>
-            <hr className="border-gray-300 w-full my-4" />
-            <label
-              htmlFor="document"
-              className="cursor-pointer text-blue-500 underline hover:text-blue-600 text-lg"
+            <div className="flex items-center w-full my-4">
+              <hr className="flex-grow border-gray-300" />
+              <span className="px-4 text-gray-600 text-lg">o</span>
+              <hr className="flex-grow border-gray-300" />
+            </div>{" "}
+            <button
+              type="button"
+              onClick={() => document.getElementById("document")?.click()}
+              className="px-6 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
             >
               Seleccionar archivo
-            </label>
+            </button>
             <input
               type="file"
               id="document"
