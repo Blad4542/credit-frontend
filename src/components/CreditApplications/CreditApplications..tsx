@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // Importar useNavigate al inicio del archivo
 import Modal from "./InfoModal";
-import { apiRequest } from "../../utils/utils";
+import { apiRequest, mapIdTypeToDisplay } from "../../utils/utils";
 import headerImage from "../../assets/header-image.png";
 import samlaLogo from "../../assets/samla-image.png";
 
@@ -32,6 +33,8 @@ const ApplicationsTable: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
 
   const recordsPerPage = 10;
+
+  const navigate = useNavigate(); // Hook para la navegación
 
   // Fetch applications from the API
   const fetchApplications = async () => {
@@ -79,7 +82,16 @@ const ApplicationsTable: React.FC = () => {
   };
 
   if (loading) {
-    return <p className="text-center mt-10">Cargando datos...</p>;
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
+          <p className="text-blue-500 text-lg font-semibold">
+            Cargando datos, por favor espera...
+          </p>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
@@ -110,7 +122,12 @@ const ApplicationsTable: React.FC = () => {
         <h1 className="text-2xl font-bold my-6 text-gray-800">
           Historial de registro
         </h1>
-
+        <button
+          onClick={() => navigate("/")} // Redirigir a la ruta "/"
+          className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+        >
+          Crear registro
+        </button>
         {/* Tabla */}
         <div className="bg-white shadow-md rounded-lg overflow-hidden">
           <div className="overflow-x-auto">
@@ -262,7 +279,7 @@ const ApplicationsTable: React.FC = () => {
                   <div>
                     <p className="text-sm font-semibold">Tipo de documento</p>
                     <p className="text-gray-700">
-                      {selectedApplication.idType}
+                      {mapIdTypeToDisplay(selectedApplication.idType)}
                     </p>
                   </div>
                   <div>

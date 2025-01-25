@@ -1,19 +1,34 @@
 import axios from "axios";
 
+//function to map the idType to display
+export const mapIdTypeToDisplay = (idType: string): string => {
+  switch (idType) {
+    case "physical":
+      return "Físico";
+    case "legal":
+      return "Jurídica";
+    case "passport":
+      return "Pasaporte";
+    default:
+      return "Desconocido";
+  }
+};
+
+//functio to map the placeHolder to display
 export const getIdPlaceholder = (idType: string): string => {
   switch (idType) {
     case "physical":
-      return "1-2345-6789";
+      return "123456789";
     case "legal":
-      return "3-101-45678";
+      return "310145678";
     case "passport":
-      return "1-2345-6789";
+      return "123456789";
     default:
       return "Selecciona un tipo de identificación";
   }
 };
 
-// Crear instancia de Axios con configuración base
+//create axios instance
 export const axiosInstance = axios.create({
   baseURL: "https://credit-backend.netlify.app/api", // Cambia según tu URL base
   headers: {
@@ -21,7 +36,7 @@ export const axiosInstance = axios.create({
   },
 });
 
-// Función genérica para hacer peticiones
+// generic function to make api request
 export const apiRequest = async <T>(
   endpoint: any,
   method = "GET",
@@ -54,6 +69,7 @@ export const apiRequest = async <T>(
   }
 };
 
+//function to upload image to cloudinary
 export const uploadToCloudinary = async (file: File, folder: string) => {
   const cloudName = "pendev"; // Reemplaza con tu Cloudinary Cloud Name
   const uploadPreset = "CreditApp"; // Reemplaza con tu Upload Preset
@@ -80,7 +96,7 @@ type Cantons = {
     [canton: string]: string[];
   };
 };
-
+//function to get the provinces and cantons
 export const provincesAndCantons: Cantons = {
   "San José": {
     Central: ["Carmen", "Merced", "Hospital", "Catedral", "Zapote"],

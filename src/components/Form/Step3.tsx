@@ -10,6 +10,7 @@ interface Step3Props {
   handlePhotoValidation: (isValid: boolean) => void;
   handleSelfieCapture: (selfieData: string) => void;
   handleSubmit: () => void; // Llamar a la función de envío al cerrar el modal
+  errorMessage: string | null; // Mensaje de error recibido desde MainForm
 }
 
 const Step3: React.FC<Step3Props> = ({
@@ -121,9 +122,28 @@ const Step3: React.FC<Step3Props> = ({
     }
   };
 
-  const handleFinalize = () => {
-    stopCamera(); // Cierra la cámara
-    setIsModalOpen(true); // Abre el modal
+  const handleFinalize = async () => {
+    if (isAnalyzing) return; // Prevenir ejecución durante el análisis
+
+    stopCamera(); // Detiene la cámara
+    setIsAnalyzing(true); // Indica que el proceso está en curso
+
+    try {
+      const isSuccess = await handleSubmit(); // Llama al método handleSubmit del MainForm
+      setIsModalOpen(true); // Abre el modal en cualquier caso
+      if (!isSuccess) {
+        setErrorMessage(
+          "Ya existe un registro con estos datos. Intenta nuevamente."
+        );
+      }
+    } catch (error) {
+      setErrorMessage(
+        "Hubo un error al realizar la solicitud. Intenta nuevamente."
+      );
+      setIsModalOpen(true); // Asegura que el modal se abra también en caso de error
+    } finally {
+      setIsAnalyzing(false); // Detiene el estado de análisis
+    }
   };
 
   const closeModal = () => {
@@ -261,23 +281,25 @@ const Step3: React.FC<Step3Props> = ({
       </div>
 
       {/* Modal de éxito */}
-      <Modal
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        title="¡Solicitud Exitosa!"
-      >
-        <p className="text-gray-800 text-lg">
-          Tu solicitud ha sido enviada exitosamente.
-        </p>
-        <div className="mt-4 flex justify-end">
-          <button
-            onClick={closeModal}
-            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-          >
-            Aceptar
-          </button>
-        </div>
-      </Modal>
+      {isModalOpen && (
+        <Modal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          title={errorMessage ? "Error al enviar" : "¡Solicitud Exitosa!"}
+        >
+          <p className="text-gray-800 text-lg">
+            {errorMessage || "Tu solicitud ha sido enviada exitosamente."}
+          </p>
+          <div className="mt-4 flex justify-end">
+            <button
+              onClick={closeModal}
+              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+            >
+              Aceptar
+            </button>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 };

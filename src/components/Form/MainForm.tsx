@@ -37,6 +37,7 @@ const MainForm: React.FC = () => {
 
   const [currentStep, setCurrentStep] = useState(1);
   const [apiMessage, setApiMessage] = useState<string | null>(null); // Mensaje de éxito o error
+  const [isSubmitting, setIsSubmitting] = useState(false); // Estado para controlar el envío
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -108,8 +109,8 @@ const MainForm: React.FC = () => {
 
   const handleSubmit = async () => {
     setApiMessage(null); // Resetea el mensaje
+    setIsSubmitting(true); // Indica que el envío está en curso
 
-    // Ajustar los datos al formato esperado por la base de datos
     const payload: ApplicationPayload = {
       firstName: formData.firstName,
       lastName: formData.lastName,
@@ -127,18 +128,26 @@ const MainForm: React.FC = () => {
 
     try {
       console.log("Enviando datos al API:", payload);
-
-      // Llamada al API usando apiRequest
       const response = await apiRequest("/createApplication", "POST", payload);
-
       console.log("Respuesta del API:", response);
-
       setApiMessage("Solicitud realizada con éxito.");
-    } catch (error) {
+      return true; // Devuelve éxito
+    } catch (error: any) {
       console.error("Error al enviar los datos:", error);
-      setApiMessage(
-        "Hubo un error al realizar la solicitud. Intenta nuevamente."
-      );
+
+      // Detectar error por datos duplicados
+      if (error.response && error.response.status === 409) {
+        setApiMessage(
+          "Ya existe un registro con estos datos. Intenta nuevamente."
+        );
+      } else {
+        setApiMessage(
+          "Hubo un error al realizar la solicitud. Intenta nuevamente."
+        );
+      }
+      return false; // Devuelve error
+    } finally {
+      setIsSubmitting(false); // Finaliza el estado de envío
     }
   };
 
@@ -204,6 +213,7 @@ const MainForm: React.FC = () => {
             handlePhotoValidation={handlePhotoValidation}
             handleSelfieCapture={handleSelfieCapture}
             handleSubmit={handleSubmit}
+            errorMessage={apiMessage}
           />
         )}
       </div>
