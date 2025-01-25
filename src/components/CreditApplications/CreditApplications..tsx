@@ -31,7 +31,7 @@ const ApplicationsTable: React.FC = () => {
     useState<Application | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
 
-  const recordsPerPage = 15;
+  const recordsPerPage = 10;
 
   // Fetch applications from the API
   const fetchApplications = async () => {
@@ -162,13 +162,17 @@ const ApplicationsTable: React.FC = () => {
         </div>
 
         {/* Paginación */}
-        <div className="flex justify-center mt-6">
+        <div className="flex justify-end mt-6">
           <nav>
             <ul className="inline-flex space-x-1">
               <li>
                 <button
                   onClick={() => handlePageChange(currentPage - 1)}
-                  className="px-4 py-2 bg-white text-gray-600 border rounded-l-md hover:bg-gray-100"
+                  className={`px-4 py-2 border rounded-l-md hover:bg-gray-100 ${
+                    currentPage === 1
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-white text-gray-600"
+                  }`}
                   disabled={currentPage === 1}
                 >
                   {"<"}
@@ -178,8 +182,10 @@ const ApplicationsTable: React.FC = () => {
                 <li key={i}>
                   <button
                     onClick={() => handlePageChange(i + 1)}
-                    className={`px-4 py-2 bg-white text-gray-600 border hover:bg-gray-100 ${
-                      currentPage === i + 1 ? "bg-blue-500 text-white" : ""
+                    className={`px-4 py-2 border hover:bg-gray-100 ${
+                      currentPage === i + 1
+                        ? "bg-blue-500 text-white"
+                        : "bg-white text-gray-600"
                     }`}
                   >
                     {i + 1}
@@ -189,7 +195,11 @@ const ApplicationsTable: React.FC = () => {
               <li>
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
-                  className="px-4 py-2 bg-white text-gray-600 border rounded-r-md hover:bg-gray-100"
+                  className={`px-4 py-2 border rounded-r-md hover:bg-gray-100 ${
+                    currentPage === totalPages
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-white text-gray-600"
+                  }`}
                   disabled={currentPage === totalPages}
                 >
                   {">"}
