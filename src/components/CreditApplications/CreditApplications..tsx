@@ -14,7 +14,8 @@ interface Application {
   municipality: string;
   address: string;
   monthlyIncome: string;
-  documentPhotos?: string[];
+  idDocumentBase64: string;
+  selfieBase64?: string; // Agregado para el selfie en formato base64
 }
 
 const ApplicationsTable: React.FC = () => {
@@ -65,6 +66,14 @@ const ApplicationsTable: React.FC = () => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
+  };
+
+  const decodeBase64Image = (base64: string, type: string = "image/png") => {
+    // Verifica si ya incluye el prefijo
+    if (!base64.startsWith("data:image")) {
+      return `data:${type};base64,${base64}`;
+    }
+    return base64;
   };
 
   if (loading) {
@@ -170,72 +179,98 @@ const ApplicationsTable: React.FC = () => {
       </div>
 
       {/* Modal */}
-      <Modal
-        isOpen={!!selectedApplication}
-        onClose={closeModal}
-        title={`${selectedApplication?.firstName || ""} ${
-          selectedApplication?.lastName || ""
-        }`}
-      >
+      <Modal isOpen={!!selectedApplication} onClose={closeModal} title="">
         {selectedApplication && (
-          <div>
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <p className="text-sm font-semibold">Correo electrónico</p>
-                <p className="text-gray-700">{selectedApplication.email}</p>
+          <div className="p-6">
+            {/* Contenedor principal */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+              {/* Selfie */}
+              <div className="flex justify-center items-center bg-gray-100 w-full h-40 rounded-md">
+                {selectedApplication.selfieBase64 ? (
+                  <img
+                    src={selectedApplication.selfieBase64}
+                    alt="Selfie"
+                    className="w-full h-full object-cover rounded-md"
+                  />
+                ) : (
+                  <p className="text-gray-500">No disponible</p>
+                )}
               </div>
-              <div>
-                <p className="text-sm font-semibold">Departamento</p>
-                <p className="text-gray-700">
-                  {selectedApplication.department}
+
+              {/* Datos del usuario */}
+              <div className="lg:col-span-2">
+                <p className="text-xl font-bold text-gray-800 mb-2">
+                  {`${selectedApplication.firstName} ${selectedApplication.lastName}`}
                 </p>
-              </div>
-              <div>
-                <p className="text-sm font-semibold">Número de teléfono</p>
-                <p className="text-gray-700">
-                  {selectedApplication.phoneNumber}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm font-semibold">Municipio</p>
-                <p className="text-gray-700">
-                  {selectedApplication.municipality}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm font-semibold">Tipo de documento</p>
-                <p className="text-gray-700">{selectedApplication.idType}</p>
-              </div>
-              <div>
-                <p className="text-sm font-semibold">Dirección</p>
-                <p className="text-gray-700">{selectedApplication.address}</p>
-              </div>
-              <div>
-                <p className="text-sm font-semibold">Número de documento</p>
-                <p className="text-gray-700">{selectedApplication.idNumber}</p>
-              </div>
-              <div>
-                <p className="text-sm font-semibold">Ingresos mensuales</p>
-                <p className="text-gray-700">
-                  {selectedApplication.monthlyIncome}
-                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-semibold">Correo electrónico</p>
+                    <p className="text-gray-700">{selectedApplication.email}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold">Departamento</p>
+                    <p className="text-gray-700">
+                      {selectedApplication.department}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold">Número de teléfono</p>
+                    <p className="text-gray-700">
+                      {selectedApplication.phoneNumber}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold">Municipio</p>
+                    <p className="text-gray-700">
+                      {selectedApplication.municipality}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold">Tipo de documento</p>
+                    <p className="text-gray-700">
+                      {selectedApplication.idType}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold">Dirección</p>
+                    <p className="text-gray-700">
+                      {selectedApplication.address}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold">Número de documento</p>
+                    <p className="text-gray-700">
+                      {selectedApplication.idNumber}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold">Ingresos mensuales</p>
+                    <p className="text-gray-700">
+                      {selectedApplication.monthlyIncome}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
-            <h3 className="mt-6 text-lg font-semibold">
+
+            {/* Separador */}
+            <hr className="border-t border-gray-300 my-6" />
+
+            {/* Documentos de identidad */}
+            <h3 className="text-lg font-semibold mb-4">
               Documento de identidad
             </h3>
-            <div className="grid grid-cols-2 gap-4 mt-4">
-              {selectedApplication.documentPhotos?.length ? (
-                selectedApplication.documentPhotos.map((photo, index) => (
-                  <img
-                    key={index}
-                    src={photo}
-                    alt={`Document ${index + 1}`}
-                    className="w-full h-auto border rounded-md"
-                  />
-                ))
+            <div className="grid grid-cols-2 gap-4">
+              {selectedApplication.idDocumentBase64 ? (
+                <img
+                  src={selectedApplication.idDocumentBase64}
+                  alt="Documento"
+                  className="w-full h-auto border rounded-md"
+                />
               ) : (
-                <p className="text-gray-500">No hay documentos disponibles</p>
+                <div className="bg-gray-100 w-full h-40 flex items-center justify-center border rounded-md">
+                  <p className="text-gray-500">No disponible</p>
+                </div>
               )}
             </div>
           </div>
