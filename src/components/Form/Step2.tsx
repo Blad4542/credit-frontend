@@ -30,10 +30,9 @@ const Step2: React.FC<Step2Props> = ({
 }) => {
   const [cantons, setCantons] = useState<string[]>([]);
   const [districts, setDistricts] = useState<string[]>([]);
-  const [incomeError, setIncomeError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [dragActive, setDragActive] = useState<boolean>(false);
   const [fileName, setFileName] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const initialCantons = Object.keys(provincesAndCantons["San José"]);
@@ -81,14 +80,32 @@ const Step2: React.FC<Step2Props> = ({
     } as React.ChangeEvent<HTMLSelectElement>);
   };
 
-  const validateIncome = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (!/^\d+(\.\d{1,2})?$/.test(value)) {
-      setIncomeError("Por favor, ingrese un monto válido.");
-    } else {
-      setIncomeError(null);
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      if (file.type.startsWith("image/")) {
+        setFileName(file.name);
+
+        try {
+          const cloudinaryUrl = await uploadToCloudinary(file, "CreditApp");
+
+          handleFileUpload(cloudinaryUrl);
+
+          // Limpiar mensaje de error al subir correctamente
+          setErrors((prev) => ({ ...prev, document: "" }));
+        } catch {
+          setErrors((prev) => ({
+            ...prev,
+            document: "Error al subir la imagen.",
+          }));
+        }
+      } else {
+        setErrors((prev) => ({
+          ...prev,
+          document: "Por favor, suba únicamente archivos de imagen.",
+        }));
+      }
     }
-    handleInputChange(e);
   };
 
   const handleFileDrop = async (e: React.DragEvent<HTMLDivElement>) => {
@@ -99,67 +116,65 @@ const Step2: React.FC<Step2Props> = ({
       const file = e.dataTransfer.files[0];
       if (file.type.startsWith("image/")) {
         setFileName(file.name);
-        setErrorMessage(null);
 
         try {
-          // Subir la imagen a Cloudinary
-          const cloudinaryUrl = await uploadToCloudinary(
-            file,
-            "CreditApp" // Cambia esto por tu preset de Cloudinary
-          );
+          const cloudinaryUrl = await uploadToCloudinary(file, "CreditApp");
 
-          handleFileUpload(cloudinaryUrl); // Guardar la URL generada en el formData
-          console.log("Imagen subida a Cloudinary:", cloudinaryUrl);
-        } catch (error) {
-          setErrorMessage("Error al subir la imagen a Cloudinary.");
-          console.error("Error al subir la imagen:", error);
+          handleFileUpload(cloudinaryUrl);
+
+          // Limpiar mensaje de error al subir correctamente
+          setErrors((prev) => ({ ...prev, document: "" }));
+        } catch {
+          setErrors((prev) => ({
+            ...prev,
+            document: "Error al subir la imagen.",
+          }));
         }
       } else {
-        setErrorMessage("Por favor, suba únicamente archivos de imagen.");
+        setErrors((prev) => ({
+          ...prev,
+          document: "Por favor, suba únicamente archivos de imagen.",
+        }));
       }
-    } else {
-      setErrorMessage("No se seleccionó ningún archivo.");
     }
   };
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      if (file.type.startsWith("image/")) {
-        setErrorMessage(null);
-        setFileName(file.name);
+  const handleValidation = () => {
+    const newErrors: Record<string, string> = {};
 
-        try {
-          const cloudinaryUrl = await uploadToCloudinary(
-            file,
-            "CreditApp" // Cambia esto por el nombre de tu preset en Cloudinary
-          );
-
-          handleFileUpload(cloudinaryUrl); // Guarda la URL en el formData
-          console.log("Imagen subida a Cloudinary:", cloudinaryUrl);
-        } catch (error) {
-          setErrorMessage("Error al subir la imagen a Cloudinary.");
-        }
-      } else {
-        setErrorMessage("Por favor, suba únicamente archivos de imagen.");
-      }
-    } else {
-      setErrorMessage("No se seleccionó ningún archivo.");
+    if (!formData.department) {
+      newErrors.department = "La provincia es obligatoria.";
     }
+
+    if (!formData.municipality) {
+      newErrors.municipality = "El cantón es obligatorio.";
+    }
+
+    if (!formData.address) {
+      newErrors.address = "El distrito es obligatorio.";
+    }
+
+    if (!formData.monthlyIncome || isNaN(Number(formData.monthlyIncome))) {
+      newErrors.monthlyIncome = "Debe ingresar un ingreso mensual válido.";
+    }
+
+    if (!formData.document) {
+      newErrors.document = "Debe subir un archivo.";
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
   };
 
-  useEffect(() => {
-    if (formData.document) {
-      // Usa un nombre predeterminado o algo relacionado con el momento de la carga
-      setFileName("Documento cargado");
-    } else {
-      setFileName(null); // Resetea el nombre si no hay archivo
+  const handleSubmit = () => {
+    if (handleValidation()) {
+      nextStep();
     }
-  }, [formData.document]);
+  };
 
   return (
     <div className="flex flex-col h-screen w-screen bg-gray-100">
-      {/* Header con imagen */}
       <div className="w-full h-[34px]">
         <img
           src={headerImage}
@@ -168,9 +183,7 @@ const Step2: React.FC<Step2Props> = ({
         />
       </div>
 
-      {/* Contenedor principal */}
       <div className="flex flex-col lg:flex-row h-full items-center justify-center px-4 lg:px-16">
-        {/* Columna izquierda */}
         <div className="lg:w-1/2 w-full flex flex-col justify-center items-center lg:items-start p-4 lg:p-8">
           <img
             src={logoImage}
@@ -181,7 +194,6 @@ const Step2: React.FC<Step2Props> = ({
             Datos de vivienda
           </h1>
 
-          {/* Provincia */}
           <div className="mb-4 relative group w-full">
             <label
               htmlFor="department"
@@ -202,9 +214,11 @@ const Step2: React.FC<Step2Props> = ({
                 </option>
               ))}
             </select>
+            {errors.department && (
+              <p className="text-sm text-red-500 mt-1">{errors.department}</p>
+            )}
           </div>
 
-          {/* Cantón */}
           <div className="mb-4 relative group w-full">
             <label
               htmlFor="municipality"
@@ -225,9 +239,11 @@ const Step2: React.FC<Step2Props> = ({
                 </option>
               ))}
             </select>
+            {errors.municipality && (
+              <p className="text-sm text-red-500 mt-1">{errors.municipality}</p>
+            )}
           </div>
 
-          {/* Distrito */}
           <div className="mb-4 relative group w-full">
             <label
               htmlFor="address"
@@ -248,9 +264,11 @@ const Step2: React.FC<Step2Props> = ({
                 </option>
               ))}
             </select>
+            {errors.address && (
+              <p className="text-sm text-red-500 mt-1">{errors.address}</p>
+            )}
           </div>
 
-          {/* Ingresos Mensuales */}
           <div className="mb-4 relative group w-full">
             <label
               htmlFor="monthlyIncome"
@@ -263,17 +281,18 @@ const Step2: React.FC<Step2Props> = ({
               id="monthlyIncome"
               name="monthlyIncome"
               value={formData.monthlyIncome}
-              onChange={validateIncome}
+              onChange={handleInputChange}
               placeholder="₡0.00"
               className="mt-1 block w-full p-3 border border-gray-300 rounded-md"
             />
-            {incomeError && (
-              <p className="text-sm text-red-500 mt-1">{incomeError}</p>
+            {errors.monthlyIncome && (
+              <p className="text-sm text-red-500 mt-1">
+                {errors.monthlyIncome}
+              </p>
             )}
           </div>
         </div>
 
-        {/* Columna derecha */}
         <div className="lg:w-1/2 w-full flex flex-col justify-center items-center p-8">
           <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center lg:mt-0">
             Fotografía de documento de identidad
@@ -310,8 +329,8 @@ const Step2: React.FC<Step2Props> = ({
               onChange={handleFileChange}
               className="hidden"
             />
-            {errorMessage && (
-              <p className="text-sm text-red-500 mt-2">{errorMessage}</p>
+            {errors.document && (
+              <p className="text-sm text-red-500 mt-2">{errors.document}</p>
             )}
             {fileName && (
               <p className="text-sm text-green-600 mt-2">
@@ -319,7 +338,6 @@ const Step2: React.FC<Step2Props> = ({
               </p>
             )}
           </div>
-          {/* Botones debajo de la caja */}
           <div className="w-full flex justify-end space-x-4 px-8 py-4 mt-6">
             <button
               type="button"
@@ -330,7 +348,7 @@ const Step2: React.FC<Step2Props> = ({
             </button>
             <button
               type="submit"
-              onClick={nextStep}
+              onClick={handleSubmit}
               className="px-6 py-2 bg-orange-500 text-white font-semibold rounded-md hover:bg-orange-600"
             >
               Continuar
