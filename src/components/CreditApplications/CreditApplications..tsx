@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // Importar useNavigate al inicio del archivo
+import { useNavigate } from "react-router-dom";
 import Modal from "./InfoModal";
 import { apiRequest, mapIdTypeToDisplay } from "../../utils/utils";
 import headerImage from "../../assets/header-image.png";
@@ -18,7 +18,7 @@ interface Application {
   address: string;
   monthlyIncome: string;
   idDocumentBase64: string;
-  selfieBase64?: string; // Agregado para el selfie en formato base64
+  selfieBase64?: string;
 }
 
 const ApplicationsTable: React.FC = () => {
@@ -34,7 +34,7 @@ const ApplicationsTable: React.FC = () => {
 
   const recordsPerPage = 10;
 
-  const navigate = useNavigate(); // Hook para la navegación
+  const navigate = useNavigate();
 
   // Fetch applications from the API
   const fetchApplications = async () => {
@@ -72,9 +72,8 @@ const ApplicationsTable: React.FC = () => {
       setCurrentPage(page);
     }
   };
-
+  //decode base64 image
   const decodeBase64Image = (base64: string, type: string = "image/png") => {
-    // Verifica si ya incluye el prefijo
     if (!base64.startsWith("data:image")) {
       return `data:${type};base64,${base64}`;
     }
@@ -100,15 +99,13 @@ const ApplicationsTable: React.FC = () => {
 
   return (
     <div className="w-screen">
-      {/* Encabezado */}
+      {/* Header */}
       <header className="relative w-full h-[50px] sm:h-[60px]">
-        {/* Imagen de fondo del header */}
         <img
           src={headerImage}
           alt="Samla Header"
           className="w-full h-full object-cover"
         />
-        {/* Logo de Samla centrado */}
         <div className="absolute inset-0 flex items-center ml-33">
           <img
             src={samlaLogo}
@@ -123,12 +120,12 @@ const ApplicationsTable: React.FC = () => {
           Historial de registro
         </h1>
         <button
-          onClick={() => navigate("/")} // Redirigir a la ruta "/"
+          onClick={() => navigate("/")}
           className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
         >
           Crear registro
         </button>
-        {/* Tabla */}
+        {/* Table */}
         <div className="bg-white shadow-md rounded-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="table-auto w-full text-left border-collapse">
@@ -178,7 +175,7 @@ const ApplicationsTable: React.FC = () => {
           </div>
         </div>
 
-        {/* Paginación */}
+        {/* Pagination */}
         <div className="flex justify-end mt-6">
           <nav>
             <ul className="inline-flex space-x-1">
@@ -226,16 +223,11 @@ const ApplicationsTable: React.FC = () => {
           </nav>
         </div>
       </div>
-
-      {/* Título */}
-
       {/* Modal */}
       <Modal isOpen={!!selectedApplication} onClose={closeModal} title="">
         {selectedApplication && (
           <div className="p-6">
-            {/* Contenedor principal */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-              {/* Selfie */}
               <div className="flex justify-center items-center bg-gray-100 w-full h-40 rounded-md">
                 {selectedApplication.selfieBase64 ? (
                   <img
@@ -247,8 +239,6 @@ const ApplicationsTable: React.FC = () => {
                   <p className="text-gray-500">No disponible</p>
                 )}
               </div>
-
-              {/* Datos del usuario */}
               <div className="lg:col-span-2">
                 <p className="text-xl font-bold text-gray-800 mb-2">
                   {`${selectedApplication.firstName} ${selectedApplication.lastName}`}
@@ -303,11 +293,7 @@ const ApplicationsTable: React.FC = () => {
                 </div>
               </div>
             </div>
-
-            {/* Separador */}
             <hr className="border-t border-gray-300 my-6" />
-
-            {/* Documentos de identidad */}
             <h3 className="text-lg font-semibold mb-4">
               Documento de identidad
             </h3>

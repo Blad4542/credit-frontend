@@ -107,9 +107,9 @@ const MainForm: React.FC = () => {
     }
   };
 
-  const handleSubmit = async () => {
-    setApiMessage(null); // Resetea el mensaje
-    setIsSubmitting(true); // Indica que el envío está en curso
+  const handleSubmit = async (): Promise<boolean> => {
+    setApiMessage(null);
+    setIsSubmitting(true);
 
     const payload: ApplicationPayload = {
       firstName: formData.firstName,
@@ -127,15 +127,12 @@ const MainForm: React.FC = () => {
     };
 
     try {
-      console.log("Enviando datos al API:", payload);
       const response = await apiRequest("/createApplication", "POST", payload);
-      console.log("Respuesta del API:", response);
       setApiMessage("Solicitud realizada con éxito.");
-      return true; // Devuelve éxito
+      return true;
     } catch (error: any) {
       console.error("Error al enviar los datos:", error);
-
-      // Detectar error por datos duplicados
+      // validates if theres a register with the same data in the database
       if (error.response && error.response.status === 409) {
         setApiMessage(
           "Ya existe un registro con estos datos. Intenta nuevamente."
@@ -145,9 +142,9 @@ const MainForm: React.FC = () => {
           "Hubo un error al realizar la solicitud. Intenta nuevamente."
         );
       }
-      return false; // Devuelve error
+      return false;
     } finally {
-      setIsSubmitting(false); // Finaliza el estado de envío
+      setIsSubmitting(false);
     }
   };
 
