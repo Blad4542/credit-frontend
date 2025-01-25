@@ -75,19 +75,22 @@ const Step1: React.FC<Step1Props> = ({
       </div>
       <div className="lg:w-1/2 w-full h-full flex items-center justify-center bg-white">
         <form
-          className="w-full max-w-md flex flex-col justify-between h-[90%]"
+          className="w-full max-w-md flex flex-col justify-between items-center lg:items-start h-[90%]"
           onSubmit={handleSubmit}
         >
-          <div className="flex">
+          {/* Contenedor del logo y título */}
+          <div className="flex flex-col items-center lg:items-start mb-8">
+            {/* Logo */}
             <img
               src={logoImage}
               alt="Logo"
               className="w-32 h-auto object-contain mb-4"
             />
+            {/* Título */}
+            <h1 className="text-2xl font-bold text-gray-800">Registro</h1>
           </div>
 
-          <h1 className="text-2xl font-bold text-gray-800 mb-6">Registro</h1>
-          <div className="space-y-4">
+          <div className="space-y-4 w-full">
             {/* Campo: Nombres */}
             <div className="relative group">
               <label
@@ -225,6 +228,7 @@ const Step1: React.FC<Step1Props> = ({
               )}
             </div>
           </div>
+
           <button
             type="submit"
             className="w-full py-3 bg-[#FF5C00] text-white font-semibold rounded-md hover:bg-[#e55300] focus:ring-2 focus:ring-[#FF5C00] focus:ring-opacity-50 mt-4"
