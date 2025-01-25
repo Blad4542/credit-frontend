@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Modal from "./InfoModal";
 import { apiRequest } from "../../utils/utils";
+import headerImage from "../../assets/header-image.png";
+import samlaLogo from "../../assets/samla-image.png";
 
 interface Application {
   id: string;
@@ -85,98 +87,120 @@ const ApplicationsTable: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto px-4">
+    <div className="w-screen">
       {/* Encabezado */}
-      <header className="bg-blue-600 py-2 px-4">
-        <h1 className="text-white text-lg font-semibold">Samla</h1>
+      <header className="relative w-full h-[50px] sm:h-[60px]">
+        {/* Imagen de fondo del header */}
+        <img
+          src={headerImage}
+          alt="Samla Header"
+          className="w-full h-full object-cover"
+        />
+        {/* Logo de Samla centrado */}
+        <div className="absolute inset-0 flex items-center ml-33">
+          <img
+            src={samlaLogo}
+            alt="Samla Logo"
+            className="w-[50px] sm:w-[70px] h-auto"
+          />
+        </div>
       </header>
 
-      {/* Título */}
-      <h1 className="text-2xl font-bold my-6 text-gray-800">
-        Historial de registro
-      </h1>
+      <div className="container mx-auto px-4 mt-6">
+        <h1 className="text-2xl font-bold my-6 text-gray-800">
+          Historial de registro
+        </h1>
 
-      {/* Tabla */}
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        <table className="table-auto w-full text-left border-collapse">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="px-6 py-3 border-b text-gray-600">
-                Nombres y apellidos
-              </th>
-              <th className="px-6 py-3 border-b text-gray-600">
-                Correo electrónico
-              </th>
-              <th className="px-6 py-3 border-b text-gray-600">
-                Número telefónico
-              </th>
-              <th className="px-6 py-3 border-b text-gray-600">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedApplications.map((application, index) => (
-              <tr
-                key={application.id}
-                className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
-              >
-                <td className="px-6 py-4 text-gray-800">
-                  {application.firstName + " " + application.lastName}
-                </td>
-                <td className="px-6 py-4 text-gray-800">{application.email}</td>
-                <td className="px-6 py-4 text-gray-800">
-                  {application.phoneNumber}
-                </td>
-                <td className="px-6 py-4 text-blue-500">
-                  <button
-                    className="hover:underline"
-                    onClick={() => setSelectedApplication(application)}
+        {/* Tabla */}
+        <div className="bg-white shadow-md rounded-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="table-auto w-full text-left border-collapse">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="px-6 py-3 border-b text-[#667085] ">
+                    Nombres y apellidos
+                  </th>
+                  <th className="px-6 py-3 border-b text-[#667085]">
+                    Correo electrónico
+                  </th>
+                  <th className="px-6 py-3 border-b text-[#667085]">
+                    Número telefónico
+                  </th>
+                  <th className="px-6 py-3 border-b text-[#667085]">
+                    Acciones
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedApplications.map((application, index) => (
+                  <tr
+                    key={application.id}
+                    className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
                   >
-                    Ver detalle
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                    <td className="px-6 py-4 text-black font-medium text-sm">
+                      {application.firstName + " " + application.lastName}
+                    </td>
+                    <td className="px-6 py-4 text-sm font-normal text-[#667085]">
+                      {application.email}
+                    </td>
+                    <td className="px-6 py-4 text-sm font-normal text-[#667085]">
+                      {application.phoneNumber}
+                    </td>
+                    <td className="px-6 py-4 text-blue-500">
+                      <button
+                        className="hover:underline"
+                        onClick={() => setSelectedApplication(application)}
+                      >
+                        Ver detalle
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
-      {/* Paginación */}
-      <div className="flex justify-center mt-6">
-        <nav>
-          <ul className="inline-flex space-x-1">
-            <li>
-              <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                className="px-4 py-2 bg-white text-gray-600 border rounded-l-md hover:bg-gray-100"
-                disabled={currentPage === 1}
-              >
-                {"<"}
-              </button>
-            </li>
-            {Array.from({ length: totalPages }).map((_, i) => (
-              <li key={i}>
+        {/* Paginación */}
+        <div className="flex justify-center mt-6">
+          <nav>
+            <ul className="inline-flex space-x-1">
+              <li>
                 <button
-                  onClick={() => handlePageChange(i + 1)}
-                  className={`px-4 py-2 bg-white text-gray-600 border hover:bg-gray-100 ${
-                    currentPage === i + 1 ? "bg-blue-500 text-white" : ""
-                  }`}
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  className="px-4 py-2 bg-white text-gray-600 border rounded-l-md hover:bg-gray-100"
+                  disabled={currentPage === 1}
                 >
-                  {i + 1}
+                  {"<"}
                 </button>
               </li>
-            ))}
-            <li>
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                className="px-4 py-2 bg-white text-gray-600 border rounded-r-md hover:bg-gray-100"
-                disabled={currentPage === totalPages}
-              >
-                {">"}
-              </button>
-            </li>
-          </ul>
-        </nav>
+              {Array.from({ length: totalPages }).map((_, i) => (
+                <li key={i}>
+                  <button
+                    onClick={() => handlePageChange(i + 1)}
+                    className={`px-4 py-2 bg-white text-gray-600 border hover:bg-gray-100 ${
+                      currentPage === i + 1 ? "bg-blue-500 text-white" : ""
+                    }`}
+                  >
+                    {i + 1}
+                  </button>
+                </li>
+              ))}
+              <li>
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  className="px-4 py-2 bg-white text-gray-600 border rounded-r-md hover:bg-gray-100"
+                  disabled={currentPage === totalPages}
+                >
+                  {">"}
+                </button>
+              </li>
+            </ul>
+          </nav>
+        </div>
       </div>
+
+      {/* Título */}
 
       {/* Modal */}
       <Modal isOpen={!!selectedApplication} onClose={closeModal} title="">
