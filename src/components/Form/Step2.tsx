@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { provincesAndCantons } from "../../utils/utils";
+import { provincesAndCantons, uploadToCloudinary } from "../../utils/utils";
 import uploadIcon from "../../assets/upload-icon.png"; // Icono para arrastrar
 import logoImage from "../../assets/logo.png"; // Imagen del logo Samla
 import headerImage from "../../assets/header-image.png"; // Imagen del header
@@ -26,7 +26,6 @@ const Step2: React.FC<Step2Props> = ({
   handleInputChange,
   handleFileUpload,
   handleCancel,
-  prevStep,
   nextStep,
 }) => {
   const [cantons, setCantons] = useState<string[]>([]);
@@ -92,19 +91,34 @@ const Step2: React.FC<Step2Props> = ({
     handleInputChange(e);
   };
 
-  const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleFileDrop = async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setDragActive(false);
 
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0];
       if (file.type.startsWith("image/")) {
-        handleFileUpload(file);
         setFileName(file.name);
         setErrorMessage(null);
+
+        try {
+          // Subir la imagen a Cloudinary
+          const cloudinaryUrl = await uploadToCloudinary(
+            file,
+            "CreditApp" // Cambia esto por tu preset de Cloudinary
+          );
+
+          handleFileUpload(cloudinaryUrl); // Guardar la URL generada en el formData
+          console.log("Imagen subida a Cloudinary:", cloudinaryUrl);
+        } catch (error) {
+          setErrorMessage("Error al subir la imagen a Cloudinary.");
+          console.error("Error al subir la imagen:", error);
+        }
       } else {
         setErrorMessage("Por favor, suba únicamente archivos de imagen.");
       }
+    } else {
+      setErrorMessage("No se seleccionó ningún archivo.");
     }
   };
 
@@ -112,14 +126,20 @@ const Step2: React.FC<Step2Props> = ({
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       if (file.type.startsWith("image/")) {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const base64String = reader.result as string;
-          handleFileUpload(base64String); // Guardar la imagen como base64
-        };
-        reader.readAsDataURL(file);
-        setFileName(file.name);
         setErrorMessage(null);
+        setFileName(file.name);
+
+        try {
+          const cloudinaryUrl = await uploadToCloudinary(
+            file,
+            "CreditApp" // Cambia esto por el nombre de tu preset en Cloudinary
+          );
+
+          handleFileUpload(cloudinaryUrl); // Guarda la URL en el formData
+          console.log("Imagen subida a Cloudinary:", cloudinaryUrl);
+        } catch (error) {
+          setErrorMessage("Error al subir la imagen a Cloudinary.");
+        }
       } else {
         setErrorMessage("Por favor, suba únicamente archivos de imagen.");
       }

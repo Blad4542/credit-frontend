@@ -2,6 +2,22 @@ import React, { useState } from "react";
 import Step1 from "./Step1";
 import Step2 from "./Step2";
 import Step3 from "./Step3";
+import { apiRequest } from "../../utils/utils";
+
+interface ApplicationPayload {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  idType: string;
+  idNumber: string;
+  department: string;
+  municipality: string;
+  address: string;
+  monthlyIncome: number;
+  idDocumentBase64: string;
+  selfieBase64: string;
+}
 
 const MainForm: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -20,6 +36,7 @@ const MainForm: React.FC = () => {
   });
 
   const [currentStep, setCurrentStep] = useState(1);
+  const [apiMessage, setApiMessage] = useState<string | null>(null); // Mensaje de éxito o error
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -31,7 +48,7 @@ const MainForm: React.FC = () => {
     }));
   };
 
-  const handleFileUpload = (base64File: string) => {
+  const handleFileUpload = (base64File: any) => {
     setFormData((prev) => ({
       ...prev,
       document: base64File, // Guardar en base64
@@ -90,26 +107,38 @@ const MainForm: React.FC = () => {
   };
 
   const handleSubmit = async () => {
+    setApiMessage(null); // Resetea el mensaje
+
+    // Ajustar los datos al formato esperado por la base de datos
+    const payload: ApplicationPayload = {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      phoneNumber: formData.phoneNumber,
+      idType: formData.idType,
+      idNumber: formData.idNumber,
+      department: formData.department,
+      municipality: formData.municipality,
+      address: formData.address,
+      monthlyIncome: Number(formData.monthlyIncome), // Convertir a número
+      idDocumentBase64: formData.document, // Clave esperada para el documento
+      selfieBase64: formData.selfie, // Clave esperada para el selfie
+    };
+
     try {
-      console.log("Enviando datos al API:", formData);
+      console.log("Enviando datos al API:", payload);
 
-      // Aquí puedes realizar la petición al API con fetch o axios
-      const response = await fetch("https://api.example.com/submit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      // Llamada al API usando apiRequest
+      const response = await apiRequest("/createApplication", "POST", payload);
 
-      if (!response.ok) {
-        throw new Error("Error al enviar los datos");
-      }
+      console.log("Respuesta del API:", response);
 
-      const result = await response.json();
-      console.log("Respuesta del API:", result);
+      setApiMessage("Solicitud realizada con éxito.");
     } catch (error) {
       console.error("Error al enviar los datos:", error);
+      setApiMessage(
+        "Hubo un error al realizar la solicitud. Intenta nuevamente."
+      );
     }
   };
 
@@ -137,6 +166,18 @@ const MainForm: React.FC = () => {
           </svg>
         </button>
       )}
+      {/* Mensaje de éxito o error */}
+      {apiMessage && (
+        <div className="absolute top-16 left-1/2 transform -translate-x-1/2 bg-white p-4 rounded-md shadow-md text-center">
+          <p
+            className={`text-lg ${
+              apiMessage.includes("éxito") ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            {apiMessage}
+          </p>
+        </div>
+      )}
 
       {/* Pasos del formulario */}
       <div className="h-full flex items-center justify-center">
@@ -153,15 +194,16 @@ const MainForm: React.FC = () => {
             formData={formData}
             handleInputChange={handleInputChange}
             handleFileUpload={handleFileUpload}
+            handleCancel={handleCancel}
             nextStep={nextStep}
             prevStep={prevStep}
           />
         )}
         {currentStep === 3 && (
           <Step3
-            nextStep={handleSubmit}
             handlePhotoValidation={handlePhotoValidation}
             handleSelfieCapture={handleSelfieCapture}
+            handleSubmit={handleSubmit}
           />
         )}
       </div>

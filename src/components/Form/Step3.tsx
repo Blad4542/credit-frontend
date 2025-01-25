@@ -1,15 +1,22 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom"; // Importar useNavigate
 import * as faceapi from "face-api.js";
 import headerImage from "../../assets/header-image.png"; // Imagen del header
 import logoImage from "../../assets/logo.png"; // Logo
 import cameraIcon from "../../assets/selfie-camera.png"; // Icono de la cámara
+import Modal from "../CreditApplications/InfoModal";
 
 interface Step3Props {
-  nextStep: () => void;
   handlePhotoValidation: (isValid: boolean) => void;
+  handleSelfieCapture: (selfieData: string) => void;
+  handleSubmit: () => void; // Llamar a la función de envío al cerrar el modal
 }
 
-const Step3: React.FC<Step3Props> = ({ nextStep, handlePhotoValidation }) => {
+const Step3: React.FC<Step3Props> = ({
+  handlePhotoValidation,
+  handleSelfieCapture,
+  handleSubmit,
+}) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -18,6 +25,9 @@ const Step3: React.FC<Step3Props> = ({ nextStep, handlePhotoValidation }) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [photo, setPhoto] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const navigate = useNavigate(); // Inicializa el hook para redirección
 
   useEffect(() => {
     const loadModels = async () => {
@@ -33,6 +43,11 @@ const Step3: React.FC<Step3Props> = ({ nextStep, handlePhotoValidation }) => {
       }
     };
     loadModels();
+
+    // Limpieza para detener la cámara al desmontar el componente
+    return () => {
+      stopCamera();
+    };
   }, []);
 
   const startCamera = async () => {
@@ -74,6 +89,7 @@ const Step3: React.FC<Step3Props> = ({ nextStep, handlePhotoValidation }) => {
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
     const imageData = canvas.toDataURL("image/png");
     setPhoto(imageData);
+    handleSelfieCapture(imageData); // Guardar la foto en base64
     setIsAnalyzing(true);
 
     try {
@@ -103,6 +119,17 @@ const Step3: React.FC<Step3Props> = ({ nextStep, handlePhotoValidation }) => {
       setStream(null);
       setIsCameraReady(false);
     }
+  };
+
+  const handleFinalize = () => {
+    stopCamera(); // Cierra la cámara
+    setIsModalOpen(true); // Abre el modal
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    handleSubmit(); // Llama a la función de envío
+    navigate("/applications"); // Redirige a /applications
   };
 
   return (
@@ -208,18 +235,49 @@ const Step3: React.FC<Step3Props> = ({ nextStep, handlePhotoValidation }) => {
 
         {/* Foto capturada */}
         {photo && (
-          <div className="mt-6">
-            <h2 className="text-lg font-bold text-gray-800 text-center mb-4">
-              Foto capturada
-            </h2>
-            <img
-              src={photo}
-              alt="Foto capturada"
-              className="w-64 h-auto rounded-md shadow-md"
-            />
-          </div>
+          <>
+            <div className="mt-6">
+              <h2 className="text-lg font-bold text-gray-800 text-center mb-4">
+                Foto capturada
+              </h2>
+              <img
+                src={photo}
+                alt="Foto capturada"
+                className="w-64 h-auto rounded-md shadow-md"
+              />
+            </div>
+
+            {/* Botón para finalizar */}
+            <div className="mt-4">
+              <button
+                onClick={handleFinalize}
+                className="px-6 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600"
+              >
+                Realizar Solicitud
+              </button>
+            </div>
+          </>
         )}
       </div>
+
+      {/* Modal de éxito */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        title="¡Solicitud Exitosa!"
+      >
+        <p className="text-gray-800 text-lg">
+          Tu solicitud ha sido enviada exitosamente.
+        </p>
+        <div className="mt-4 flex justify-end">
+          <button
+            onClick={closeModal}
+            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+          >
+            Aceptar
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 };

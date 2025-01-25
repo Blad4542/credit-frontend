@@ -22,10 +22,10 @@ export const axiosInstance = axios.create({
 });
 
 // Función genérica para hacer peticiones
-export const apiRequest = async (
+export const apiRequest = async <T>(
   endpoint: any,
   method = "GET",
-  data = null,
+  data: T | null = null, // Cambiar 'null | undefined' a 'T | null'
   customHeaders = {}
 ) => {
   try {
@@ -39,7 +39,7 @@ export const apiRequest = async (
     });
 
     return response.data; // Devuelve solo los datos
-  } catch (error) {
+  } catch (error: any) {
     // Manejo de errores
     if (error.response) {
       // Respuesta del servidor con un error
@@ -54,7 +54,34 @@ export const apiRequest = async (
   }
 };
 
-export const provincesAndCantons = {
+export const uploadToCloudinary = async (file: File, folder: string) => {
+  const cloudName = "pendev"; // Reemplaza con tu Cloudinary Cloud Name
+  const uploadPreset = "CreditApp"; // Reemplaza con tu Upload Preset
+
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", uploadPreset);
+  formData.append("folder", folder); // Opcional: especifica una carpeta
+
+  try {
+    const response = await axios.post(
+      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+      formData
+    );
+    return response.data.secure_url; // Devuelve la URL de la imagen
+  } catch (error) {
+    console.error("Error al subir la imagen a Cloudinary:", error);
+    throw new Error("No se pudo subir la imagen. Inténtalo de nuevo.");
+  }
+};
+
+type Cantons = {
+  [province: string]: {
+    [canton: string]: string[];
+  };
+};
+
+export const provincesAndCantons: Cantons = {
   "San José": {
     Central: ["Carmen", "Merced", "Hospital", "Catedral", "Zapote"],
     Escazú: ["Escazú", "San Antonio", "San Rafael"],
