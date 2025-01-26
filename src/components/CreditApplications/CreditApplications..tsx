@@ -17,8 +17,8 @@ interface Application {
   municipality: string;
   address: string;
   monthlyIncome: string;
-  idDocumentBase64: string;
-  selfieBase64: string;
+  document: string;
+  selfie: string;
 }
 
 const ApplicationsTable: React.FC = () => {
@@ -215,9 +215,9 @@ const ApplicationsTable: React.FC = () => {
           <div className="p-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
               <div className="flex justify-center items-center bg-gray-100 w-full h-40 rounded-md">
-                {selectedApplication.selfieBase64 ? (
+                {selectedApplication.selfie ? (
                   <img
-                    src={selectedApplication.selfieBase64}
+                    src={selectedApplication.selfie}
                     alt="Selfie"
                     className="w-full h-full object-cover rounded-md"
                   />
@@ -284,9 +284,9 @@ const ApplicationsTable: React.FC = () => {
               Documento de identidad
             </h3>
             <div className="grid grid-cols-2 gap-4">
-              {selectedApplication.idDocumentBase64 ? (
+              {selectedApplication.document ? (
                 <img
-                  src={selectedApplication.idDocumentBase64}
+                  src={selectedApplication.document}
                   alt="Documento"
                   className="w-full h-auto border rounded-md"
                 />
