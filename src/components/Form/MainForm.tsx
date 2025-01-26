@@ -125,7 +125,7 @@ const MainForm: React.FC = () => {
 
     try {
       const response = await apiRequest("/createApplication", "POST", payload);
-      setApiMessage("Solicitud realizada con éxito.");
+      setApiMessage(response.data.message || "Solicitud realizada con éxito.");
       return true;
     } catch (error: any) {
       console.error("Error al enviar los datos:", error);
@@ -203,6 +203,7 @@ const MainForm: React.FC = () => {
             handlePhotoValidation={handlePhotoValidation}
             handleSelfieCapture={handleSelfieCapture}
             handleSubmit={handleSubmit}
+            isSubmitting={isSubmitting}
             errorMessage={apiMessage}
           />
         )}

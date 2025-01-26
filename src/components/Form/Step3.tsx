@@ -11,6 +11,7 @@ interface Step3Props {
   handleSelfieCapture: (selfieData: string) => void;
   handleSubmit: () => void;
   errorMessage: string | null;
+  isSubmitting: boolean;
 }
 
 const Step3: React.FC<Step3Props> = ({
@@ -132,6 +133,8 @@ const Step3: React.FC<Step3Props> = ({
     try {
       const isSuccess = await handleSubmit();
       setIsModalOpen(true);
+      // @ts-ignore
+
       if (!isSuccess) {
         setErrorMessage(
           "Ya existe un registro con estos datos. Intenta nuevamente."
