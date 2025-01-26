@@ -2,22 +2,6 @@ import React, { useState } from "react";
 import Step1 from "./Step1";
 import Step2 from "./Step2";
 import Step3 from "./Step3";
-import { apiRequest } from "../../utils/utils";
-
-interface ApplicationPayload {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phoneNumber: string;
-  idType: string;
-  idNumber: string;
-  department: string;
-  municipality: string;
-  address: string;
-  monthlyIncome: number;
-  idDocumentBase64: string;
-  selfieBase64: string;
-}
 
 const MainForm: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -37,8 +21,6 @@ const MainForm: React.FC = () => {
 
   const [currentStep, setCurrentStep] = useState(1);
   const [apiMessage, setApiMessage] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false); // Para evitar solicitudes duplicadas
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -96,58 +78,6 @@ const MainForm: React.FC = () => {
     });
     setCurrentStep(1);
     setApiMessage(null); // Limpia el mensaje API
-    setIsSubmitted(false); // Resetear el estado de envío
-  };
-
-  const handlePhotoValidation = (isValid: boolean) => {
-    if (isValid) {
-      console.log("La foto es válida.");
-    } else {
-      console.log("La foto no es válida.");
-    }
-  };
-
-  const handleSubmit = async (): Promise<boolean> => {
-    if (isSubmitted) return false; // Evita reenvíos
-    setIsSubmitted(true); // Marca el formulario como enviado
-
-    setApiMessage(null);
-    setIsSubmitting(true);
-
-    const payload: ApplicationPayload = {
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      email: formData.email,
-      phoneNumber: formData.phoneNumber,
-      idType: formData.idType,
-      idNumber: formData.idNumber,
-      department: formData.department,
-      municipality: formData.municipality,
-      address: formData.address,
-      monthlyIncome: Number(formData.monthlyIncome),
-      idDocumentBase64: formData.document,
-      selfieBase64: formData.selfie,
-    };
-
-    try {
-      const response = await apiRequest("/createApplication", "POST", payload);
-      setApiMessage(response.data.message || "Solicitud realizada con éxito.");
-      console.log(response.data.message);
-      return true;
-    } catch (error: any) {
-      if (error.response && error.response.status === 409) {
-        setApiMessage(
-          "Ya existe un registro con estos datos. Intenta nuevamente."
-        );
-      } else {
-        setApiMessage(
-          "Hubo un error al realizar la solicitud. Intenta nuevamente."
-        );
-      }
-      return false;
-    } finally {
-      setIsSubmitting(false);
-    }
   };
 
   return (
@@ -205,12 +135,9 @@ const MainForm: React.FC = () => {
         )}
         {currentStep === 3 && (
           <Step3
-            handlePhotoValidation={handlePhotoValidation}
+            formData={formData}
             handleSelfieCapture={handleSelfieCapture}
-            handleSubmit={handleSubmit}
-            errorMessage={apiMessage}
-            setErrorMessage={setApiMessage} // Pasar setApiMessage como setErrorMessage
-            isSubmitting={isSubmitting}
+            handleCancel={handleCancel}
           />
         )}
       </div>

@@ -18,7 +18,7 @@ interface Application {
   address: string;
   monthlyIncome: string;
   idDocumentBase64: string;
-  selfieBase64?: string;
+  selfieBase64: string;
 }
 
 const ApplicationsTable: React.FC = () => {

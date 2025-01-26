@@ -5,22 +5,31 @@ import headerImage from "../../assets/header-image.png";
 import logoImage from "../../assets/logo.png";
 import cameraIcon from "../../assets/selfie-camera.png";
 import Modal from "../CreditApplications/InfoModal";
+import { apiRequest } from "../../utils/utils";
 
 interface Step3Props {
-  handlePhotoValidation: (isValid: boolean) => void;
+  formData: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phoneNumber: string;
+    idType: string;
+    idNumber: string;
+    department: string;
+    municipality: string;
+    address: string;
+    monthlyIncome: string;
+    document: string;
+    selfie: string;
+  };
   handleSelfieCapture: (selfieData: string) => void;
-  handleSubmit: () => Promise<boolean>;
-  errorMessage: string | null;
-  setErrorMessage: (message: string | null) => void; // Agregar esta propiedad
-  isSubmitting: boolean;
+  handleCancel: () => void;
 }
 
 const Step3: React.FC<Step3Props> = ({
-  handlePhotoValidation,
+  formData,
   handleSelfieCapture,
-  handleSubmit,
-  setErrorMessage,
-  errorMessage,
+  handleCancel,
 }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -30,19 +39,24 @@ const Step3: React.FC<Step3Props> = ({
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [photo, setPhoto] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [modalMessage, setModalMessage] = useState<string | null>(null);
+  const [isSuccess, setIsSuccess] = useState<boolean | null>(null);
 
   const navigate = useNavigate();
 
+  // Cargar modelos de face-api.js
   useEffect(() => {
     const loadModels = async () => {
       try {
         const MODEL_URL = "/models";
         await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
         setLoadingModels(false);
-      } catch (error) {
-        setErrorMessage(
+      } catch {
+        setModalMessage(
           "Error al cargar los modelos. Intenta recargar la página."
-        ); // Usar la prop aquí
+        );
+        setIsModalOpen(true);
         setLoadingModels(false);
       }
     };
@@ -51,12 +65,12 @@ const Step3: React.FC<Step3Props> = ({
     return () => {
       stopCamera();
     };
-  }, [setErrorMessage]); // Asegurar que setErrorMessage esté en las dependencias
+  }, []);
 
   const startCamera = async () => {
-    setErrorMessage(null);
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      setErrorMessage("Tu navegador no soporta acceso a la cámara.");
+      setModalMessage("Tu navegador no soporta acceso a la cámara.");
+      setIsModalOpen(true);
       return;
     }
 
@@ -73,12 +87,12 @@ const Step3: React.FC<Step3Props> = ({
         };
       }
     } catch {
-      setErrorMessage("Error al acceder a la cámara.");
+      setModalMessage("Error al acceder a la cámara.");
+      setIsModalOpen(true);
     }
   };
 
   const capturePhoto = async () => {
-    setErrorMessage(null);
     if (!videoRef.current || !canvasRef.current) return;
 
     const video = videoRef.current;
@@ -102,16 +116,15 @@ const Step3: React.FC<Step3Props> = ({
       );
 
       if (detections.length > 0) {
-        handlePhotoValidation(true);
-        setTimeout(() => {
-          setIsAnalyzing(false);
-        }, 2000);
+        setIsAnalyzing(false);
       } else {
-        setErrorMessage("No se detectó un rostro. Intenta de nuevo.");
+        setModalMessage("No se detectó un rostro. Intenta de nuevo.");
+        setIsModalOpen(true);
         setIsAnalyzing(false);
       }
     } catch {
-      setErrorMessage("Error al procesar la foto. Intenta de nuevo.");
+      setModalMessage("Error al procesar la foto. Intenta de nuevo.");
+      setIsModalOpen(true);
       setIsAnalyzing(false);
     }
   };
@@ -124,34 +137,45 @@ const Step3: React.FC<Step3Props> = ({
     }
   };
 
-  const handleFinalize = async () => {
-    if (isAnalyzing) return;
+  const handleSubmit = async () => {
+    setModalMessage(null);
+    setIsSubmitting(true);
 
-    stopCamera();
-    setIsAnalyzing(true);
+    const payload = {
+      ...formData,
+      monthlyIncome: Number(formData.monthlyIncome),
+    };
 
     try {
-      const isSuccess = await handleSubmit();
-      setIsModalOpen(true);
-
-      if (!isSuccess) {
-        setErrorMessage(
-          "Ya existe un registro con estos datos. Intenta nuevamente."
-        );
+      await apiRequest("/createApplication", "POST", payload);
+      setModalMessage("¡Solicitud realizada con éxito!");
+      setIsSuccess(true);
+    } catch (error: any) {
+      if (error.response && error.response.status === 409) {
+        setModalMessage("Ya existe un registro con estos datos.");
+        setIsSuccess(false);
+      } else if (error.response && error.response.status === 500) {
+        setModalMessage("Problemas con el servidor, intenta de nuevo.");
+        setIsSuccess(false);
+      } else {
+        setModalMessage("Ya existe un registro con estos datos.");
+        setIsSuccess(false);
       }
-    } catch (error) {
-      setErrorMessage(
-        "Hubo un error al realizar la solicitud. Intenta nuevamente."
-      );
-      setIsModalOpen(true);
     } finally {
-      setIsAnalyzing(false);
+      setIsModalOpen(true);
+      setIsSubmitting(false);
     }
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
-    navigate("/applications"); // Navega a /applications solo si todo fue exitoso
+    if (isSuccess) {
+      navigate("/applications");
+      stopCamera();
+    } else {
+      navigate("/");
+      stopCamera();
+    }
   };
 
   return (
@@ -159,16 +183,12 @@ const Step3: React.FC<Step3Props> = ({
       <div className="w-full h-[34px] bg-gray-100">
         <img
           src={headerImage}
-          alt="Samla Header"
+          alt="Header"
           className="w-full h-full object-cover"
         />
       </div>
       <div className="flex-1 flex flex-col items-center justify-start px-4 overflow-y-auto">
-        <img
-          src={logoImage}
-          alt="Samla Logo"
-          className="w-24 h-auto mt-4 mb-6"
-        />
+        <img src={logoImage} alt="Logo" className="w-24 h-auto mt-4 mb-6" />
         <div className="mb-8">
           <img
             src={cameraIcon}
@@ -182,8 +202,6 @@ const Step3: React.FC<Step3Props> = ({
         <p className="text-center text-gray-600 mb-6">
           Sonríe y asegúrate de tener buena iluminación.
         </p>
-
-        {/* Camera and actions */}
         <div className="w-full max-w-lg flex flex-col items-center">
           {loadingModels ? (
             <p className="text-gray-600">Cargando modelos...</p>
@@ -210,9 +228,6 @@ const Step3: React.FC<Step3Props> = ({
             </>
           )}
         </div>
-        {errorMessage && (
-          <p className="text-red-500 text-sm mt-4">{errorMessage}</p>
-        )}
         <div className="flex flex-col items-center mt-6 gap-4">
           <button
             onClick={capturePhoto}
@@ -220,6 +235,12 @@ const Step3: React.FC<Step3Props> = ({
             disabled={!isCameraReady || loadingModels}
           >
             Capturar foto
+          </button>
+          <button
+            onClick={handleCancel}
+            className="px-6 py-2 bg-gray-500 text-white font-semibold rounded-md hover:bg-gray-600"
+          >
+            Cancelar
           </button>
           {isCameraReady && (
             <button
@@ -240,13 +261,11 @@ const Step3: React.FC<Step3Props> = ({
             </div>
           </div>
         )}
-
-        {/* picture taked */}
         {photo && (
           <>
             <div className="mt-6">
               <h2 className="text-lg font-bold text-gray-800 text-center mb-4">
-                Foto capturada
+                Foto capturada:
               </h2>
               <img
                 src={photo}
@@ -256,27 +275,26 @@ const Step3: React.FC<Step3Props> = ({
             </div>
             <div className="mt-4">
               <button
-                onClick={handleFinalize}
+                onClick={handleSubmit}
                 className="px-6 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600"
+                disabled={isSubmitting}
               >
-                Realizar Solicitud
+                {isSubmitting ? "Enviando..." : "Realizar Solicitud"}
               </button>
             </div>
           </>
         )}
       </div>
 
-      {/* Success Modal */}
+      {/* Modal */}
       {isModalOpen && (
         <Modal
           isOpen={isModalOpen}
           onClose={closeModal}
-          title={errorMessage ? "Error al enviar" : "¡Solicitud Exitosa!"}
+          title={isSuccess ? "¡Éxito!" : "Error"}
         >
-          <p className="text-gray-800 text-lg">
-            {errorMessage || "Tu solicitud ha sido enviada exitosamente."}
-          </p>
-          <div className="mt-4 flex justify-end">
+          <p className="text-gray-800 text-lg">{modalMessage}</p>
+          <div className="flex justify-end mt-4">
             <button
               onClick={closeModal}
               className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
