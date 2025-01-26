@@ -72,13 +72,6 @@ const ApplicationsTable: React.FC = () => {
       setCurrentPage(page);
     }
   };
-  //decode base64 image
-  const decodeBase64Image = (base64: string, type: string = "image/png") => {
-    if (!base64.startsWith("data:image")) {
-      return `data:${type};base64,${base64}`;
-    }
-    return base64;
-  };
 
   if (loading) {
     return (
