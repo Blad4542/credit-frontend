@@ -1,50 +1,100 @@
-# React + TypeScript + Vite
+# Frontend: Registro y Consulta de Aplicaciones
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Este proyecto es una aplicación frontend que permite a los usuarios registrar solicitudes de crédito mediante un flujo de pasos y consultar las aplicaciones registradas a través de una tabla con paginación. Se integra con un backend para gestionar los datos.
 
-Currently, two official plugins are available:
+## 🚀 Funcionalidades principales
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Flujo de registro paso a paso:**
 
-## Expanding the ESLint configuration
+  - Ingreso de datos personales y financieros.
+  - Subida de documentos en formato Base64.
+  - Captura de selfie con validación facial usando `face-api.js`.
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+- **Tabla de consultas:**
 
-- Configure the top-level `parserOptions` property like this:
+  - Visualización de aplicaciones registradas.
+  - Paginación dinámica basada en datos provenientes del backend.
+  - Modal para mostrar detalles específicos de cada registro.
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+- **Manejo de errores:**
+  - Validación en tiempo real de datos ingresados.
+  - Mensajes de error y éxito en un modal.
+
+## 🛠️ Tecnologías utilizadas
+
+- **Framework:** [React.js](https://reactjs.org/)
+- **Librerías:**
+  - [React Router](https://reactrouter.com/): Navegación entre vistas.
+  - [face-api.js](https://github.com/justadudewho/face-api.js): Detección facial para la validación de selfies.
+  - [Axios](https://axios-http.com/): Para realizar solicitudes HTTP al backend.
+- **Diseño:**
+  - CSS y Tailwind CSS para un diseño limpio y responsivo.
+
+## 🗂️ Estructura del proyecto
+
+```plaintext
+src/
+├── assets/                 # Imágenes y recursos estáticos
+├── components/             # Componentes reutilizables
+├── pages/                  # Páginas principales
+│   ├── Step1.tsx           # Paso 1 del flujo de registro
+│   ├── Step2.tsx           # Paso 2 del flujo de registro
+│   ├── Step3.tsx           # Paso 3: Captura de selfie y envío
+│   ├── ApplicationsTable.tsx # Tabla de consultas
+├── utils/                  # Utilidades y funciones auxiliares
+├── App.tsx                 # Componente principal de la aplicación
+└── index.tsx               # Punto de entrada de React
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+## ⚙️ Instalación y configuración
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+1. Clonar el repositorio
+   git clone <URL-del-repositorio>
+   cd frontend-app
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+2. Instalar dependencias
+   Asegúrate de tener instalado Node.js y usa npm o yarn para instalar las dependencias:
+
+npm install
+
+# o
+
+yarn install
+
+3. Configurar variables de entorno
+   Crea un archivo .env en la raíz del proyecto y define las siguientes variables según sea necesario:
+
+env
+
+REACT_APP_API_BASE_URL=http://<tu-backend-url>
+
+4. Iniciar el proyecto
+   Ejecuta el servidor de desarrollo:
+
+npm start
+
+# o
+
+yarn start
+
+La aplicación estará disponible en http://localhost:3000.
+
+## 📂 Endpoints consumidos
+
+- POST /createApplication: Registra una nueva aplicación.
+- GET /getApplications?page={page}&limit={limit}: Obtiene aplicaciones paginadas.
+
+## 💡 Cómo usar la aplicación
+
+- **Registrar una aplicación:**
+  - Completa los formularios paso a paso.
+  - Carga documentos e imágenes en formato Base64.
+  - Captura una selfie y verifica el rostro.
+  - Envía la solicitud.
+  - Consultar aplicaciones:
+
+Navega a la tabla de aplicaciones.
+
+Explora los registros paginados.
+
+Haz clic en "Ver detalle" para inspeccionar cada registro.
