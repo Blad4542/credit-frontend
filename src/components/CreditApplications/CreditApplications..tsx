@@ -23,26 +23,26 @@ interface Application {
 
 const ApplicationsTable: React.FC = () => {
   const [applications, setApplications] = useState<Application[]>([]);
-  const [paginatedApplications, setPaginatedApplications] = useState<
-    Application[]
-  >([]);
+  const [totalRecords, setTotalRecords] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedApplication, setSelectedApplication] =
     useState<Application | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
 
-  const recordsPerPage = 10;
-
+  const recordsPerPage = 10; // Número de registros por página
   const navigate = useNavigate();
 
   // Fetch applications from the API
-  const fetchApplications = async () => {
+  const fetchApplications = async (page: number) => {
     try {
       setLoading(true);
-      const response = await apiRequest("/getApplications", "GET");
-      setApplications(response.data);
-      setPaginatedApplications(response.data.slice(0, recordsPerPage));
+      const response = await apiRequest(
+        `/getApplications?page=${page}&limit=${recordsPerPage}`,
+        "GET"
+      );
+      setApplications(response.data); // Datos para la página actual
+      setTotalRecords(response.totalRecords); // Total de registros
     } catch (err: any) {
       setError(err.message || "Error desconocido.");
     } finally {
@@ -50,18 +50,11 @@ const ApplicationsTable: React.FC = () => {
     }
   };
 
-  // Update paginated data whenever the page or applications change
   useEffect(() => {
-    const startIndex = (currentPage - 1) * recordsPerPage;
-    const endIndex = startIndex + recordsPerPage;
-    setPaginatedApplications(applications.slice(startIndex, endIndex));
-  }, [currentPage, applications]);
+    fetchApplications(currentPage); // Fetch data cada vez que cambia la página
+  }, [currentPage]);
 
-  useEffect(() => {
-    fetchApplications();
-  }, []);
-
-  const totalPages = Math.ceil(applications.length / recordsPerPage);
+  const totalPages = Math.ceil(totalRecords / recordsPerPage);
 
   const closeModal = () => {
     setSelectedApplication(null);
@@ -139,7 +132,7 @@ const ApplicationsTable: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {paginatedApplications.map((application, index) => (
+                {applications.map((application, index) => (
                   <tr
                     key={application.id}
                     className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}

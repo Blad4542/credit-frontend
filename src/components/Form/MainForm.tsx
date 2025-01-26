@@ -38,6 +38,7 @@ const MainForm: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [apiMessage, setApiMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false); // Para evitar solicitudes duplicadas
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -94,6 +95,8 @@ const MainForm: React.FC = () => {
       selfie: "",
     });
     setCurrentStep(1);
+    setApiMessage(null); // Limpia el mensaje API
+    setIsSubmitted(false); // Resetear el estado de envío
   };
 
   const handlePhotoValidation = (isValid: boolean) => {
@@ -105,6 +108,9 @@ const MainForm: React.FC = () => {
   };
 
   const handleSubmit = async (): Promise<boolean> => {
+    if (isSubmitted) return false; // Evita reenvíos
+    setIsSubmitted(true); // Marca el formulario como enviado
+
     setApiMessage(null);
     setIsSubmitting(true);
 
@@ -126,10 +132,9 @@ const MainForm: React.FC = () => {
     try {
       const response = await apiRequest("/createApplication", "POST", payload);
       setApiMessage(response.data.message || "Solicitud realizada con éxito.");
+      console.log(response.data.message);
       return true;
     } catch (error: any) {
-      console.error("Error al enviar los datos:", error);
-      // validates if theres a register with the same data in the database
       if (error.response && error.response.status === 409) {
         setApiMessage(
           "Ya existe un registro con estos datos. Intenta nuevamente."
@@ -203,8 +208,9 @@ const MainForm: React.FC = () => {
             handlePhotoValidation={handlePhotoValidation}
             handleSelfieCapture={handleSelfieCapture}
             handleSubmit={handleSubmit}
-            isSubmitting={isSubmitting}
             errorMessage={apiMessage}
+            setErrorMessage={setApiMessage} // Pasar setApiMessage como setErrorMessage
+            isSubmitting={isSubmitting}
           />
         )}
       </div>

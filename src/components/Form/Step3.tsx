@@ -9,8 +9,9 @@ import Modal from "../CreditApplications/InfoModal";
 interface Step3Props {
   handlePhotoValidation: (isValid: boolean) => void;
   handleSelfieCapture: (selfieData: string) => void;
-  handleSubmit: () => void;
+  handleSubmit: () => Promise<boolean>;
   errorMessage: string | null;
+  setErrorMessage: (message: string | null) => void; // Agregar esta propiedad
   isSubmitting: boolean;
 }
 
@@ -18,6 +19,8 @@ const Step3: React.FC<Step3Props> = ({
   handlePhotoValidation,
   handleSelfieCapture,
   handleSubmit,
+  setErrorMessage,
+  errorMessage,
 }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -26,7 +29,6 @@ const Step3: React.FC<Step3Props> = ({
   const [loadingModels, setLoadingModels] = useState(true);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [photo, setPhoto] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const navigate = useNavigate();
@@ -40,7 +42,7 @@ const Step3: React.FC<Step3Props> = ({
       } catch (error) {
         setErrorMessage(
           "Error al cargar los modelos. Intenta recargar la página."
-        );
+        ); // Usar la prop aquí
         setLoadingModels(false);
       }
     };
@@ -49,9 +51,7 @@ const Step3: React.FC<Step3Props> = ({
     return () => {
       stopCamera();
     };
-  }, []);
-
-  // initialize the camera
+  }, [setErrorMessage]); // Asegurar que setErrorMessage esté en las dependencias
 
   const startCamera = async () => {
     setErrorMessage(null);
@@ -76,7 +76,7 @@ const Step3: React.FC<Step3Props> = ({
       setErrorMessage("Error al acceder a la cámara.");
     }
   };
-  //capture the photo
+
   const capturePhoto = async () => {
     setErrorMessage(null);
     if (!videoRef.current || !canvasRef.current) return;
@@ -115,7 +115,7 @@ const Step3: React.FC<Step3Props> = ({
       setIsAnalyzing(false);
     }
   };
-  //stops the camera
+
   const stopCamera = () => {
     if (stream) {
       stream.getTracks().forEach((track) => track.stop());
@@ -133,7 +133,6 @@ const Step3: React.FC<Step3Props> = ({
     try {
       const isSuccess = await handleSubmit();
       setIsModalOpen(true);
-      // @ts-ignore
 
       if (!isSuccess) {
         setErrorMessage(
@@ -152,8 +151,7 @@ const Step3: React.FC<Step3Props> = ({
 
   const closeModal = () => {
     setIsModalOpen(false);
-    handleSubmit();
-    navigate("/applications");
+    navigate("/applications"); // Navega a /applications solo si todo fue exitoso
   };
 
   return (
