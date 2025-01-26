@@ -1,16 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom"; // Importar useNavigate
+import { useNavigate } from "react-router-dom";
 import * as faceapi from "face-api.js";
-import headerImage from "../../assets/header-image.png"; // Imagen del header
-import logoImage from "../../assets/logo.png"; // Logo
-import cameraIcon from "../../assets/selfie-camera.png"; // Icono de la cámara
+import headerImage from "../../assets/header-image.png";
+import logoImage from "../../assets/logo.png";
+import cameraIcon from "../../assets/selfie-camera.png";
 import Modal from "../CreditApplications/InfoModal";
 
 interface Step3Props {
   handlePhotoValidation: (isValid: boolean) => void;
   handleSelfieCapture: (selfieData: string) => void;
-  handleSubmit: () => void; // Llamar a la función de envío al cerrar el modal
-  errorMessage: string | null; // Mensaje de error recibido desde MainForm
+  handleSubmit: () => void;
+  errorMessage: string | null;
 }
 
 const Step3: React.FC<Step3Props> = ({
@@ -28,7 +28,7 @@ const Step3: React.FC<Step3Props> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const navigate = useNavigate(); // Inicializa el hook para redirección
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadModels = async () => {
@@ -45,11 +45,12 @@ const Step3: React.FC<Step3Props> = ({
     };
     loadModels();
 
-    // Limpieza para detener la cámara al desmontar el componente
     return () => {
       stopCamera();
     };
   }, []);
+
+  // initialize the camera
 
   const startCamera = async () => {
     setErrorMessage(null);
@@ -74,7 +75,7 @@ const Step3: React.FC<Step3Props> = ({
       setErrorMessage("Error al acceder a la cámara.");
     }
   };
-
+  //capture the photo
   const capturePhoto = async () => {
     setErrorMessage(null);
     if (!videoRef.current || !canvasRef.current) return;
@@ -113,7 +114,7 @@ const Step3: React.FC<Step3Props> = ({
       setIsAnalyzing(false);
     }
   };
-
+  //stops the camera
   const stopCamera = () => {
     if (stream) {
       stream.getTracks().forEach((track) => track.stop());
@@ -123,14 +124,14 @@ const Step3: React.FC<Step3Props> = ({
   };
 
   const handleFinalize = async () => {
-    if (isAnalyzing) return; // Prevenir ejecución durante el análisis
+    if (isAnalyzing) return;
 
-    stopCamera(); // Detiene la cámara
-    setIsAnalyzing(true); // Indica que el proceso está en curso
+    stopCamera();
+    setIsAnalyzing(true);
 
     try {
-      const isSuccess = await handleSubmit(); // Llama al método handleSubmit del MainForm
-      setIsModalOpen(true); // Abre el modal en cualquier caso
+      const isSuccess = await handleSubmit();
+      setIsModalOpen(true);
       if (!isSuccess) {
         setErrorMessage(
           "Ya existe un registro con estos datos. Intenta nuevamente."
@@ -140,21 +141,20 @@ const Step3: React.FC<Step3Props> = ({
       setErrorMessage(
         "Hubo un error al realizar la solicitud. Intenta nuevamente."
       );
-      setIsModalOpen(true); // Asegura que el modal se abra también en caso de error
+      setIsModalOpen(true);
     } finally {
-      setIsAnalyzing(false); // Detiene el estado de análisis
+      setIsAnalyzing(false);
     }
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
-    handleSubmit(); // Llama a la función de envío
-    navigate("/applications"); // Redirige a /applications
+    handleSubmit();
+    navigate("/applications");
   };
 
   return (
     <div className="flex flex-col h-screen w-screen bg-white">
-      {/* Header */}
       <div className="w-full h-[34px] bg-gray-100">
         <img
           src={headerImage}
@@ -162,17 +162,12 @@ const Step3: React.FC<Step3Props> = ({
           className="w-full h-full object-cover"
         />
       </div>
-
-      {/* Contenido principal */}
       <div className="flex-1 flex flex-col items-center justify-start px-4 overflow-y-auto">
-        {/* Logo */}
         <img
           src={logoImage}
           alt="Samla Logo"
           className="w-24 h-auto mt-4 mb-6"
         />
-
-        {/* Icono de cámara */}
         <div className="mb-8">
           <img
             src={cameraIcon}
@@ -180,8 +175,6 @@ const Step3: React.FC<Step3Props> = ({
             className="w-20 h-20 object-contain mb-4"
           />
         </div>
-
-        {/* Mensaje principal */}
         <h1 className="text-2xl font-bold text-gray-800 text-center mb-2">
           ¡Es hora de la selfie!
         </h1>
@@ -189,7 +182,7 @@ const Step3: React.FC<Step3Props> = ({
           Sonríe y asegúrate de tener buena iluminación.
         </p>
 
-        {/* Cámara y acciones */}
+        {/* Camera and actions */}
         <div className="w-full max-w-lg flex flex-col items-center">
           {loadingModels ? (
             <p className="text-gray-600">Cargando modelos...</p>
@@ -216,13 +209,9 @@ const Step3: React.FC<Step3Props> = ({
             </>
           )}
         </div>
-
-        {/* Error */}
         {errorMessage && (
           <p className="text-red-500 text-sm mt-4">{errorMessage}</p>
         )}
-
-        {/* Botones */}
         <div className="flex flex-col items-center mt-6 gap-4">
           <button
             onClick={capturePhoto}
@@ -240,8 +229,6 @@ const Step3: React.FC<Step3Props> = ({
             </button>
           )}
         </div>
-
-        {/* Modal de análisis */}
         {isAnalyzing && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30">
             <div className="bg-white p-6 rounded-md shadow-md text-center">
@@ -253,7 +240,7 @@ const Step3: React.FC<Step3Props> = ({
           </div>
         )}
 
-        {/* Foto capturada */}
+        {/* picture taked */}
         {photo && (
           <>
             <div className="mt-6">
@@ -266,8 +253,6 @@ const Step3: React.FC<Step3Props> = ({
                 className="w-64 h-auto rounded-md shadow-md"
               />
             </div>
-
-            {/* Botón para finalizar */}
             <div className="mt-4">
               <button
                 onClick={handleFinalize}
@@ -280,7 +265,7 @@ const Step3: React.FC<Step3Props> = ({
         )}
       </div>
 
-      {/* Modal de éxito */}
+      {/* Success Modal */}
       {isModalOpen && (
         <Modal
           isOpen={isModalOpen}

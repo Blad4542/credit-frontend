@@ -31,13 +31,13 @@ const MainForm: React.FC = () => {
     municipality: "",
     address: "",
     monthlyIncome: "",
-    document: "", // Documento de Step2
-    selfie: "", // Selfie de Step3
+    document: "",
+    selfie: "",
   });
 
   const [currentStep, setCurrentStep] = useState(1);
-  const [apiMessage, setApiMessage] = useState<string | null>(null); // Mensaje de éxito o error
-  const [isSubmitting, setIsSubmitting] = useState(false); // Estado para controlar el envío
+  const [apiMessage, setApiMessage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -52,7 +52,7 @@ const MainForm: React.FC = () => {
   const handleFileUpload = (base64File: any) => {
     setFormData((prev) => ({
       ...prev,
-      document: base64File, // Guardar en base64
+      document: base64File,
     }));
   };
 
@@ -71,9 +71,6 @@ const MainForm: React.FC = () => {
   };
 
   const nextStep = () => {
-    if (currentStep === 2) {
-      console.log("Datos guardados de Step1:", formData); // Verificar el estado
-    }
     setCurrentStep((prev) => prev + 1);
   };
 
@@ -121,9 +118,9 @@ const MainForm: React.FC = () => {
       department: formData.department,
       municipality: formData.municipality,
       address: formData.address,
-      monthlyIncome: Number(formData.monthlyIncome), // Convertir a número
-      idDocumentBase64: formData.document, // Clave esperada para el documento
-      selfieBase64: formData.selfie, // Clave esperada para el selfie
+      monthlyIncome: Number(formData.monthlyIncome),
+      idDocumentBase64: formData.document,
+      selfieBase64: formData.selfie,
     };
 
     try {
@@ -150,7 +147,6 @@ const MainForm: React.FC = () => {
 
   return (
     <div className="relative h-screen w-screen bg-gray-100">
-      {/* Botón de atrás */}
       {currentStep > 1 && (
         <button
           onClick={prevStep}
@@ -172,7 +168,6 @@ const MainForm: React.FC = () => {
           </svg>
         </button>
       )}
-      {/* Mensaje de éxito o error */}
       {apiMessage && (
         <div className="absolute top-16 left-1/2 transform -translate-x-1/2 bg-white p-4 rounded-md shadow-md text-center">
           <p
@@ -184,8 +179,6 @@ const MainForm: React.FC = () => {
           </p>
         </div>
       )}
-
-      {/* Pasos del formulario */}
       <div className="h-full flex items-center justify-center">
         {currentStep === 1 && (
           <Step1

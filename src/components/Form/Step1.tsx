@@ -35,6 +35,7 @@ const Step1: React.FC<Step1Props> = ({
     idNumber: "",
   });
 
+  //validates the form
   const validateForm = () => {
     const newErrors: any = {};
     if (!formData.firstName.trim()) {
@@ -78,20 +79,16 @@ const Step1: React.FC<Step1Props> = ({
           className="w-full max-w-md flex flex-col justify-between items-center lg:items-start h-[90%]"
           onSubmit={handleSubmit}
         >
-          {/* Contenedor del logo y título */}
           <div className="flex flex-col items-center lg:items-start mb-8">
-            {/* Logo */}
             <img
               src={logoImage}
               alt="Logo"
               className="w-32 h-auto object-contain mb-4"
             />
-            {/* Título */}
             <h1 className="text-2xl font-bold text-gray-800">Registro</h1>
           </div>
 
           <div className="space-y-4 w-full">
-            {/* Campo: Nombres */}
             <div className="relative group">
               <label
                 htmlFor="firstName"
@@ -113,7 +110,6 @@ const Step1: React.FC<Step1Props> = ({
               )}
             </div>
 
-            {/* Campo: Apellidos */}
             <div className="relative group">
               <label
                 htmlFor="lastName"
@@ -134,8 +130,6 @@ const Step1: React.FC<Step1Props> = ({
                 <p className="text-sm text-red-500 mt-1">{errors.lastName}</p>
               )}
             </div>
-
-            {/* Campo: Correo */}
             <div className="relative group">
               <label
                 htmlFor="email"
@@ -156,8 +150,6 @@ const Step1: React.FC<Step1Props> = ({
                 <p className="text-sm text-red-500 mt-1">{errors.email}</p>
               )}
             </div>
-
-            {/* Campo: Número de Teléfono */}
             <div className="relative group">
               <label
                 htmlFor="phoneNumber"
@@ -180,8 +172,6 @@ const Step1: React.FC<Step1Props> = ({
                 </p>
               )}
             </div>
-
-            {/* Campo: Tipo de Identificación */}
             <div className="relative group">
               <label
                 htmlFor="idType"
@@ -205,8 +195,6 @@ const Step1: React.FC<Step1Props> = ({
                 <option value="passport">Pasaporte</option>
               </select>
             </div>
-
-            {/* Campo: Número de Identificación */}
             <div className="relative group">
               <label
                 htmlFor="idNumber"

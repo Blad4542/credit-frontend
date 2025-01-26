@@ -52,6 +52,7 @@ const Step2: React.FC<Step2Props> = ({
     } as React.ChangeEvent<HTMLSelectElement>);
   }, []);
 
+  //handle the province change to show the cantons and districts
   const handleProvinceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const province = e.target.value;
     const newCantons = Object.keys(provincesAndCantons[province] || {});
@@ -79,7 +80,7 @@ const Step2: React.FC<Step2Props> = ({
       target: { name: "address", value: newDistricts[0] },
     } as React.ChangeEvent<HTMLSelectElement>);
   };
-
+  //handle the file change to upload the image
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -107,7 +108,7 @@ const Step2: React.FC<Step2Props> = ({
       }
     }
   };
-
+  //handle the file drop to upload the image
   const handleFileDrop = async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setDragActive(false);
@@ -138,7 +139,7 @@ const Step2: React.FC<Step2Props> = ({
       }
     }
   };
-
+  //handle the validation of the form
   const handleValidation = () => {
     const newErrors: Record<string, string> = {};
 
